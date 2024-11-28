@@ -18,6 +18,7 @@ library(sqldf)
 library(tidyr)
 library(infer)
 library(countrycode)
+library(gt)
 ```
 
 ## Group Replication Portion
@@ -89,6 +90,69 @@ combined_long %>%
   labs(color = "Year", y = "Life Expectancy",
        x = "Countries sorted by 2002 Life Expectancy",
        title = "Life Expectancy of Countries in 2002 and 2019")
+```
+
+### Table Replication
+
+The table that we intend to replicate is:
+
+![](images/Replicate Table.png){width="600"}
+
+Due to the authors performing complex math equations, from this [data source](https://ghdx.healthdata.org/record/ihme-data/gbd-2013-hiv-tuberculosis-and-malaria-incidence-prevalence-and-mortality-1990-2013), we chose to write the numerical data by hand instead of performing the same calculations. The following code is our attempt at replicating the table:
+
+```{r}
+# This creates the matrix for the table, each represents a column in the table
+dis_tab <- data.frame(
+  "Column_1"= c("Low-income countries","India","Lower-middle-income countries","China","Upper-middle class-income countries","High-income countries","Global"),
+  "Total" = c(7.66, 6.96, 4.56, 5.59, 2.26, 2.61, 5.48),
+  "HIV, malaria, and TB" = c(2.56, 0.93, 0.44, 0.10, 0.15, 0.05, 0.86),
+  "HIV" = c(1.40, 0.22, 0.28, -0.02, 0.10, 0.04, 0.42),
+  "Malaria" = c(0.50, 0.12, 0.01, 0.00, 0.00, 0.00, 0.14),
+  "TB" = c(0.66, 0.59, 0.15, 0.12, 0.05, 0.02, 0.31),
+  "HIV, malaria and TB Share of Total Gain Percent" = c(33.4, 13.4, 9.6, 1.8, 6.9, 2.1, 15.8), 
+  "Population Share Percent" = c(22.9, 17.1, 18.3, 21.1, 5.3, 15.4, 100.0)
+)
+
+# Created two separate tables, combining proved to be complex
+dis_tab2 <- data.frame(
+  "Column_1_1" = c("Low-income countries (excl. India)", "Low-income countries (incl. India)"),
+  "Total" = c(32.0, 53.8),
+  "HIV, malaria, and TB" = c(67.9, 86.4),
+  "HIV" = c(76.9, 86.0),
+  "Malaria" = c(84.0, 99.1),
+  "TB" = c(48.8, 81.4)
+)
+
+# This removes the unwanted periods from the column titles
+names(dis_tab) <- gsub("\\.", " ", names(dis_tab))
+names(dis_tab2) <- gsub("\\.", " ", names(dis_tab2))
+
+# Create the formatted table using gt, and wanted to leave the first column empty like for reproducibility purposes
+dis_table <- gt(dis_tab) %>%
+  tab_header(
+    title = "Gain in life expectancy (years)"
+  ) %>%
+  cols_label(
+    "Column_1" = ""
+  ) %>%
+  tab_source_note(
+    source_note = "Source: Countries Grouped by Income (2002 World Bank classification)"
+  )
+
+dis_table2 <- gt(dis_tab2) %>%
+  tab_header(
+    title = "Share of gains accruing in low-income countries and India (percent)"
+  ) %>% 
+  cols_label(
+    "Column_1_1" = ""
+  ) %>%
+  tab_source_note(
+    source_note = "Source: Countries Grouped by Income (2002 World Bank classification)"
+)
+
+# This prints the tables for viewing
+dis_table
+dis_table2
 ```
 
 ## Isaac's Individual Portion
