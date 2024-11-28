@@ -1,4 +1,4 @@
-data <- read.csv("life_expectancy.csv")
+data <- read.csv("data/life_expectancy.csv")
 library(dplyr)
 library(ggplot2)
 library(sqldf)
