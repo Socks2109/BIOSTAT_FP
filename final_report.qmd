@@ -155,7 +155,9 @@ dis_table
 dis_table2
 ```
 
-## Isaac's Individual Portion
+## Individual Portion
+
+### Isaac
 
 In this section, we will explore the question: **Has HIV, TB, and Malaria deaths decreased between the years 2002 and 2013 globally?**
 
