@@ -93,11 +93,11 @@ combined_long %>%
 
 ## Isaac's Individual Portion
 
-In this section, we will explore the question: Has HIV, TB, and Malaria deaths decreased between the years 2002 and 2013 globally?
+In this section, we will explore the question: **Has HIV, TB, and Malaria deaths decreased between the years 2002 and 2013 globally?**
 
--   Null Hypothesis (H₀): HIV, TB, and Malaria deaths globally have not decreased significantly over the years 2002 and 2013
+-   **Null Hypothesis (H₀)**: HIV, TB, and Malaria deaths globally have not decreased significantly over the years 2002 and 2013
 
--   Alternative Hypothesis (H₁): HIV, TB, and Malaria prevalence & deaths globally have decreased significantly over the years 2002 and 2013
+-   **Alternative Hypothesis (H₁)**: HIV, TB, and Malaria prevalence & deaths globally have decreased significantly over the years 2002 and 2013
 
 To do this, first load in the datasets
 
