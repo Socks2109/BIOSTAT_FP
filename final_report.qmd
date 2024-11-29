@@ -291,4 +291,34 @@ Malaria_t_test
 
 The t value is 4.464, and the p-value is 1.389e-05. Since p \< 0.05, we reject the null hypothesis and accept the alternate for malaria deaths. Thus, malaria deaths have decreased significantly between the years 2002 and 2013 globally.
 
-In conclusion, HIV deaths have not decreased significantly between the years 2002 and 2013. However, TB and malaria have both decreased significantly.
+In conclusion, HIV deaths have not decreased significantly between the years 2002 and 2013. However, TB and malaria have both decreased significantly. This table and figure visualizes each disease's global death rates in 2002 and 2013:
+
+```{r}
+HIV_2002_sum <- sum(HIV_2002)
+HIV_2013_sum <- sum(HIV_2013)
+Malaria_2002_sum <- sum(Malaria_2002)
+Malaria_2013_sum <- sum(Malaria_2013)
+TB_2002_sum <- sum(TB_2002)
+TB_2013_sum <- sum(TB_2013)
+
+summary_data <- data.frame(
+  condition = rep(c("HIV", "Malaria", "TB"), each = 2),
+  year = rep(c(2002, 2013), times = 3),
+  sum_value = c(HIV_2002_sum, HIV_2013_sum, Malaria_2002_sum, Malaria_2013_sum, TB_2002_sum, TB_2013_sum)
+)
+
+print(summary_data)
+```
+
+```{r}
+ggplot(summary_data, aes(x = condition, y = sum_value, fill = factor(year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("2002" = "cornflowerblue", "2013" = "darkslategray1")) +  # Custom colors for each year
+  labs(
+    title = "Sum of Deaths for HIV, Malaria, and TB (2002 vs. 2013)",
+    x = "Disease",
+    y = "Sum of Deaths",
+    fill = "Year"
+  ) +
+  theme_minimal()
+```
