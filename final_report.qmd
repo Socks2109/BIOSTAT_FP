@@ -27,7 +27,7 @@ library(gt)
 
 This is the original graph that we intend to replicate:
 
-![](images/Replicate Graph.png){width="372"}
+![](images/Replicate%20Graph.png){width="372"}
 
 The paper sourced its data from Global Burden of Disease 2019 database (Institute of Health Metrics and Evaluation (IHME)). After searching through the IHME schema, we obtained our data from this [link](https://ghdx.healthdata.org/record/ihmde-data/gbd-2019-life-expectancy-HALE-1990-2019) and downloaded the data with appropriate fields from this [link](https://vizhub.healthdata.org/gbd-results/). With that done, we first read our data:
 
@@ -96,7 +96,7 @@ combined_long %>%
 
 The table that we intend to replicate is:
 
-![](images/Replicate Table.png){width="600"}
+![](images/Replicate%20Table.png){width="600"}
 
 Due to the authors performing complex math equations, from this [data source](https://ghdx.healthdata.org/record/ihme-data/gbd-2013-hiv-tuberculosis-and-malaria-incidence-prevalence-and-mortality-1990-2013), we chose to write the numerical data by hand instead of performing the same calculations. The following code is our attempt at replicating the table:
 
