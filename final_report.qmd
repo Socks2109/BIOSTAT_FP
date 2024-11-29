@@ -313,7 +313,7 @@ print(summary_data)
 ```{r}
 ggplot(summary_data, aes(x = condition, y = sum_value, fill = factor(year))) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("2002" = "cornflowerblue", "2013" = "darkslategray1")) +  # Custom colors for each year
+  scale_fill_manual(values = c("2002" = "cornflowerblue", "2013" = "darkslategray1")) +
   labs(
     title = "Sum of Deaths for HIV, Malaria, and TB (2002 vs. 2013)",
     x = "Disease",
