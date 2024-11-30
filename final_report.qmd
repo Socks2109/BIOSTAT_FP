@@ -336,6 +336,7 @@ valid_iso3 <- unique(countrycode::codelist$iso3c) # checks for valid iso3 codes
 
 # Set up the necessary variables to perform the hypothesis testing for the difference in the mean mortality rate for the years 2002 and 2013. 
 
+'''{r}
 HIV_TB_young_2002 <- HIV_TB %>%
   filter(age_group_name == "25 to 29",
          location_code %in% valid_iso3,
@@ -408,12 +409,13 @@ HIV_2013_test <- t.test(
 # Print the hypothesis testing results. 
 HIV_2002_test
 HIV_2013_test
+'''
 
 # The resultant t-value is t = -9.7376, indicating a negative difference in the mean of mortality for the younger population compared to the older, and with a p-value of less than 2.2E-16, indicating that we would reject the null hypothesis of there being no statistical difference between the two populations. 
 
 # Visualiation Process
 
-{r}
+'''{r}
 
 plot_data <- data.frame(
   year = rep(c(2002, 2013), each = 2),
@@ -435,4 +437,5 @@ ggplot(plot_data, aes(x = factor(year), y = mean_mortality, fill = age_group)) +
     fill = "Age Group"
   ) +
   theme_minimal()
+'''
 ### END INDIVIDUAL ANALYSIS: Jason 
