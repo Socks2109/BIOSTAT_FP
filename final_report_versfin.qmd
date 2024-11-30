@@ -400,16 +400,16 @@ HIV_TB_older_2013 <- HIV_TB %>%
          pull(mean)
 
 # Converting to numeric to handle any potential non-numeric values
-HIV_TB_young_numeric_2002 <- as.numeric(as.character(HIV_TB_young_2002$mean))
-HIV_TB_older_numeric_2002 <- as.numeric(as.character(HIV_TB_older_2002$mean))
-HIV_TB_young_numeric_2013 <- as.numeric(as.character(HIV_TB_young_2013$mean))
-HIV_TB_older_numeric_2013 <- as.numeric(as.character(HIV_TB_older_2013$mean))
+HIV_TB_young_numeric_2002 <- as.numeric(as.character(HIV_TB_young$mean))
+HIV_TB_older_numeric_2002 <- as.numeric(as.character(HIV_TB_older$mean))
+HIV_TB_young_numeric_2013 <- as.numeric(as.character(HIV_TB_young$mean))
+HIV_TB_older_numeric_2013 <- as.numeric(as.character(HIV_TB_older$mean))
 
 # Remove any NA values
-HIV_TB_young_numeric_2002 <- HIV_TB_young_numeric_2002[!is.na(HIV_TB_young_numeric_2002)]
-HIV_TB_older_numeric_2002 <- HIV_TB_older_numeric_2002[!is.na(HIV_TB_older_numeric_2002)]
-HIV_TB_young_numeric_2013 <- HIV_TB_young_numeric_2013[!is.na(HIV_TB_young_numeric_2013)]
-HIV_TB_older_numeric_2013 <- HIV_TB_older_numeric_2013[!is.na(HIV_TB_older_numeric_2013)]
+HIV_TB_young_numeric_2002 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
+HIV_TB_older_numeric_2002 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
+HIV_TB_young_numeric_2013 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
+HIV_TB_older_numeric_2013 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
 
 # Perform t-test for the year 2002 for younger and older population.
 HIV_2002_test <- t.test(
