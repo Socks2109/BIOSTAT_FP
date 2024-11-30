@@ -325,7 +325,7 @@ ggplot(summary_data, aes(x = condition, y = sum_value, fill = factor(year))) +
 
 ### Jason
 
-## Individual Hypothesis Test
+#### Individual Hypothesis Test
 
 Question of Interest: How does the different age groups of younger individuals compared to older individuals differ in the rate of mortality due to HIV/AIDS for the year 2002 and 2013?
 
@@ -353,8 +353,8 @@ library(countrycode)
 ```{r}
 # Read the data that was located on Desktop 
 
-HIV_TB <- read.csv("Desktop/HIV_TB_INCIDENCE_PREVALENCE_DEATHS.csv")
-Malaria <- read.csv("Desktop/MALARIA_INCIDENCE_DEATHS.csv")
+HIV_TB <- read.csv("data/HIV_TB_INCIDENCE_PREVALENCE_DEATHS.csv")
+Malaria <- read.csv("data/MALARIA_INCIDENCE_DEATHS.csv")
 
 valid_iso3 <- unique(countrycode::codelist$iso3c) # checks for valid iso3 codes
 
@@ -400,16 +400,16 @@ HIV_TB_older_2013 <- HIV_TB %>%
          pull(mean)
 
 # Converting to numeric to handle any potential non-numeric values
-HIV_TB_young_numeric_2002 <- as.numeric(as.character(HIV_TB_young$mean))
-HIV_TB_older_numeric_2002 <- as.numeric(as.character(HIV_TB_older$mean))
-HIV_TB_young_numeric_2013 <- as.numeric(as.character(HIV_TB_young$mean))
-HIV_TB_older_numeric_2013 <- as.numeric(as.character(HIV_TB_older$mean))
+HIV_TB_young_numeric_2002 <- as.numeric(as.character(HIV_TB_young_2002$mean))
+HIV_TB_older_numeric_2002 <- as.numeric(as.character(HIV_TB_older_2002$mean))
+HIV_TB_young_numeric_2013 <- as.numeric(as.character(HIV_TB_young_2013$mean))
+HIV_TB_older_numeric_2013 <- as.numeric(as.character(HIV_TB_older_2013$mean))
 
 # Remove any NA values
-HIV_TB_young_numeric_2002 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
-HIV_TB_older_numeric_2002 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
-HIV_TB_young_numeric_2013 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
-HIV_TB_older_numeric_2013 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
+HIV_TB_young_numeric_2002 <- HIV_TB_young_numeric_2002[!is.na(HIV_TB_young_numeric_2002)]
+HIV_TB_older_numeric_2002 <- HIV_TB_older_numeric_2002[!is.na(HIV_TB_older_numeric_2002)]
+HIV_TB_young_numeric_2013 <- HIV_TB_young_numeric_2013[!is.na(HIV_TB_young_numeric_2013)]
+HIV_TB_older_numeric_2013 <- HIV_TB_older_numeric_2013[!is.na(HIV_TB_older_numeric_2013)]
 
 # Perform t-test for the year 2002 for younger and older population.
 HIV_2002_test <- t.test(
@@ -434,9 +434,9 @@ HIV_2013_test
 
 ```
 
-### The resultant t-value is t = -9.7376, indicating a negative difference in the mean of mortality for the younger population compared to the older, and with a p-value of less than 2.2E-16, indicating that we would reject the null hypothesis of there being no statistical difference between the two populations.
+The resultant t-value is t = -9.7376, indicating a negative difference in the mean of mortality for the younger population compared to the older, and with a p-value of less than 2.2E-16, indicating that we would reject the null hypothesis of there being no statistical difference between the two populations.
 
-## Visualization Process
+#### Visualization Process
 
 ```{r}
 
