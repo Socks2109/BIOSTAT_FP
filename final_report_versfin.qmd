@@ -1,0 +1,463 @@
+---
+title: "Final Report"
+author: "Isaac Yeoh, Jason Rivera, Somayeh Motevalli"
+format: html
+editor: visual
+---
+
+## BIOSTATS 272 Final Project
+
+This project is based on the paper "Contributions of declining mortality, overall and from HIV, TB and malaria, to reduced health inequality and inequity across countries". ([link](https://academic.oup.com/heapol/article/38/8/939/7220370#418565028))
+
+Import packages
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(sqldf)
+library(tidyr)
+library(infer)
+library(countrycode)
+library(gt)
+```
+
+## Group Replication Portion
+
+### Graph Replication
+
+This is the original graph that we intend to replicate:
+
+![](images/Replicate%20Graph.png){width="372"}
+
+The paper sourced its data from Global Burden of Disease 2019 database (Institute of Health Metrics and Evaluation (IHME)). After searching through the IHME schema, we obtained our data from this [link](https://ghdx.healthdata.org/record/ihmde-data/gbd-2019-life-expectancy-HALE-1990-2019) and downloaded the data with appropriate fields from this [link](https://vizhub.healthdata.org/gbd-results/). With that done, we first read our data:
+
+```{r}
+data <- read.csv("data/life_expectancy.csv")
+```
+
+First, filter for the years 2002 and 2019, and obtain the location_name, year, and life expectancy value (val).
+
+```{r}
+# 2019 life expectancy
+LE_2019 <- data %>%
+  select(location_name, val, year) %>%
+  filter(year == 2019) %>%
+  arrange(val)
+
+# 2002 life expectancy
+LE_2002 <- data %>%
+  select(location_name, val, year) %>%
+  filter(year == 2002) %>%
+  arrange(val)
+```
+
+Next, we had to combine the data from the 2002 and 2019 years, and order it by countries in 2002 from lowest to highest life expectancy.
+
+```{r}
+# Combines the data and orders by 2002 LE
+combined <- sqldf("SELECT a.location_name as Country,a.val as Life_Expectancy_2002,
+                    b.val as Life_Expectancy_2019
+                FROM LE_2002 as a
+                JOIN LE_2019 as b
+                WHERE a.location_name = b.location_name
+                ORDER BY a.val ASC;
+                ")
+
+# Locks the countries so that ggplot can't auto arrange it
+combined$Country <- factor(combined$Country, levels = combined$Country)
+
+# Splits LE in 2002 and 2019 into two rows instead of columns
+combined_long <- combined %>%
+  pivot_longer(cols = starts_with("Life_Expectancy"), 
+               names_to = "Year", 
+               values_to = "Life_Expectancy") %>%
+  mutate(Year = gsub("Life_Expectancy_", "", Year))
+```
+
+Finally, visualize the data on ggplot2.
+
+```{r}
+# Plots the LE sorted by 2002 LE
+combined_long %>%
+  ggplot(aes(x = Country, y = Life_Expectancy, group = Year, color = Year)) +
+  geom_line() +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  ) +
+  scale_color_manual(values = c("2002" = "red", "2019" = "blue")) +
+  labs(color = "Year", y = "Life Expectancy",
+       x = "Countries sorted by 2002 Life Expectancy",
+       title = "Life Expectancy of Countries in 2002 and 2019")
+```
+
+### Table Replication
+
+The table that we intend to replicate is:
+
+![](images/Replicate%20Table.png){width="600"}
+
+Due to the authors performing complex math equations, from this [data source](https://ghdx.healthdata.org/record/ihme-data/gbd-2013-hiv-tuberculosis-and-malaria-incidence-prevalence-and-mortality-1990-2013), we chose to write the numerical data by hand instead of performing the same calculations. The following code is our attempt at replicating the table:
+
+```{r}
+# This creates the matrix for the table, each represents a column in the table
+dis_tab <- data.frame(
+  "Column_1"= c("Low-income countries","India","Lower-middle-income countries","China","Upper-middle class-income countries","High-income countries","Global"),
+  "Total" = c(7.66, 6.96, 4.56, 5.59, 2.26, 2.61, 5.48),
+  "HIV, malaria, and TB" = c(2.56, 0.93, 0.44, 0.10, 0.15, 0.05, 0.86),
+  "HIV" = c(1.40, 0.22, 0.28, -0.02, 0.10, 0.04, 0.42),
+  "Malaria" = c(0.50, 0.12, 0.01, 0.00, 0.00, 0.00, 0.14),
+  "TB" = c(0.66, 0.59, 0.15, 0.12, 0.05, 0.02, 0.31),
+  "HIV, malaria and TB Share of Total Gain Percent" = c(33.4, 13.4, 9.6, 1.8, 6.9, 2.1, 15.8), 
+  "Population Share Percent" = c(22.9, 17.1, 18.3, 21.1, 5.3, 15.4, 100.0)
+)
+
+# Created two separate tables, combining proved to be complex
+dis_tab2 <- data.frame(
+  "Column_1_1" = c("Low-income countries (excl. India)", "Low-income countries (incl. India)"),
+  "Total" = c(32.0, 53.8),
+  "HIV, malaria, and TB" = c(67.9, 86.4),
+  "HIV" = c(76.9, 86.0),
+  "Malaria" = c(84.0, 99.1),
+  "TB" = c(48.8, 81.4)
+)
+
+# This removes the unwanted periods from the column titles
+names(dis_tab) <- gsub("\\.", " ", names(dis_tab))
+names(dis_tab2) <- gsub("\\.", " ", names(dis_tab2))
+
+# Create the formatted table using gt, and wanted to leave the first column empty like for reproducibility purposes
+dis_table <- gt(dis_tab) %>%
+  tab_header(
+    title = "Gain in life expectancy (years)"
+  ) %>%
+  cols_label(
+    "Column_1" = ""
+  ) %>%
+  tab_source_note(
+    source_note = "Source: Countries Grouped by Income (2002 World Bank classification)"
+  )
+
+dis_table2 <- gt(dis_tab2) %>%
+  tab_header(
+    title = "Share of gains accruing in low-income countries and India (percent)"
+  ) %>% 
+  cols_label(
+    "Column_1_1" = ""
+  ) %>%
+  tab_source_note(
+    source_note = "Source: Countries Grouped by Income (2002 World Bank classification)"
+)
+
+# This prints the tables for viewing
+dis_table
+dis_table2
+```
+
+## Individual Portion
+
+### Isaac
+
+In this section, we will explore the question: **Has HIV, TB, and Malaria deaths decreased between the years 2002 and 2013 globally?**
+
+-   **Null Hypothesis (H₀)**: HIV, TB, and Malaria deaths globally have not decreased significantly over the years 2002 and 2013
+
+-   **Alternative Hypothesis (H₁)**: HIV, TB, and Malaria prevalence & deaths globally have decreased significantly over the years 2002 and 2013
+
+To do this, first load in the datasets
+
+```{r}
+HIV_TB <- read.csv("data/HIV_TB_INCIDENCE_PREVALENCE_DEATHS.csv")
+Malaria <- read.csv("data/MALARIA_INCIDENCE_DEATHS.csv")
+```
+
+Using the countrycode package, retrieve every country's ISO3 code, e.g: Australia = AUS
+
+```{r}
+valid_iso3 <- unique(countrycode::codelist$iso3c)
+```
+
+Perform data cleaning, filtering out invalid ISO3 codes, retrieving only "deaths" from "both sexes" in "all ages" from year "2002" and greater.
+
+```{r}
+HIV_TB_filtered <- HIV_TB %>%
+  filter(age_group_name == "All Ages") %>%
+  filter(location_code %in% valid_iso3) %>%
+  filter(metric == "Deaths") %>%
+  filter(unit == "Number") %>%
+  filter(sex_name == "Both sexes") %>%
+  filter(year >= 2002)
+
+Malaria_filtered <- Malaria %>%
+  filter(age_group_name == "All Ages") %>%
+  filter(location_code %in% valid_iso3) %>%
+  filter(metric == "Deaths") %>%
+  filter(unit == "Number") %>%
+  filter(sex_name == "Both sexes") %>%
+  filter(year >= 2002)
+```
+
+Pull HIV means for each country in years 2002 and 2013
+
+```{r}
+HIV_2002 <- HIV_TB_filtered %>%
+  filter(year == 2002) %>%
+  filter(cause_name == "HIV/AIDS") %>%
+  pull(mean)
+
+HIV_2002 <- as.numeric(HIV_2002)
+
+HIV_2013 <- HIV_TB_filtered %>%
+  filter(year == 2013) %>%
+  filter(cause_name == "HIV/AIDS") %>%
+  pull(mean)
+
+HIV_2013 <- as.numeric(HIV_2013)
+```
+
+Similarly, pull TB and Malaria means for each country in years 2002 and 2013
+
+```{r}
+TB_2002 <- HIV_TB_filtered %>%
+  filter(year == 2002) %>%
+  filter(cause_name == "Tuberculosis") %>%
+  pull(mean)
+
+TB_2002 <- as.numeric(TB_2002)
+
+TB_2013 <- HIV_TB_filtered %>%
+  filter(cause_name == "Tuberculosis") %>%
+  filter(year == 2013) %>%
+  pull(mean)
+
+TB_2013 <- as.numeric(TB_2013)
+```
+
+```{r}
+Malaria_2002 <- Malaria_filtered %>%
+  filter(year == 2002) %>%
+  filter(cause_name == "Malaria") %>%
+  pull(mean)
+
+Malaria_2002 <- as.numeric(Malaria_2002)
+
+Malaria_2013 <- Malaria_filtered %>%
+  filter(cause_name == "Malaria") %>%
+  filter(year == 2013) %>%
+  pull(mean)
+
+Malaria_2013 <- as.numeric(Malaria_2013)
+```
+
+Now, perform hypothesis testing for each disease. Starting with HIV:
+
+```{r}
+HIV_t_test <- t.test(
+  x = HIV_2002,
+  y = HIV_2013,
+  alternative = "two.sided", 
+  paired = TRUE,
+  conf.level = 0.95
+)
+HIV_t_test
+```
+
+The t value is 0.752, and the p-value is 0.453. Since p \> 0.05, we fail to reject the null hypothesis. Thus, HIV deaths have not decreased significantly between the years 2002 and 2013 globally. Moving on to TB:
+
+```{r}
+TB_t_test <- t.test(
+  x = TB_2002,
+  y = TB_2013,
+  alternative = "two.sided", 
+  paired = TRUE,
+  conf.level = 0.95
+)
+TB_t_test
+```
+
+The t value is 2.081, and the p-value is 0.0388. Since p \< 0.05, we reject the null hypothesis and accept the alternate for TB deaths. Thus, TB deaths have decreased significantly between the years 2002 and 2013 globally. Finally for malaria:
+
+```{r}
+Malaria_t_test <- t.test(
+  x = Malaria_2002,
+  y = Malaria_2013,
+  alternative = "two.sided", 
+  paired = TRUE,
+  conf.level = 0.95
+)
+Malaria_t_test
+```
+
+The t value is 4.464, and the p-value is 1.389e-05. Since p \< 0.05, we reject the null hypothesis and accept the alternate for malaria deaths. Thus, malaria deaths have decreased significantly between the years 2002 and 2013 globally.
+
+In conclusion, HIV deaths have not decreased significantly between the years 2002 and 2013. However, TB and malaria have both decreased significantly. This table and figure visualizes each disease's global death rates in 2002 and 2013:
+
+```{r}
+HIV_2002_sum <- sum(HIV_2002)
+HIV_2013_sum <- sum(HIV_2013)
+Malaria_2002_sum <- sum(Malaria_2002)
+Malaria_2013_sum <- sum(Malaria_2013)
+TB_2002_sum <- sum(TB_2002)
+TB_2013_sum <- sum(TB_2013)
+
+summary_data <- data.frame(
+  condition = rep(c("HIV", "Malaria", "TB"), each = 2),
+  year = rep(c(2002, 2013), times = 3),
+  sum_value = c(HIV_2002_sum, HIV_2013_sum, Malaria_2002_sum, Malaria_2013_sum, TB_2002_sum, TB_2013_sum)
+)
+
+print(summary_data)
+```
+
+```{r}
+ggplot(summary_data, aes(x = condition, y = sum_value, fill = factor(year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("2002" = "cornflowerblue", "2013" = "darkslategray1")) +
+  labs(
+    title = "Sum of Deaths for HIV, Malaria, and TB (2002 vs. 2013)",
+    x = "Disease",
+    y = "Sum of Deaths",
+    fill = "Year"
+  ) +
+  theme_minimal()
+```
+
+### Jason
+
+## Individual Hypothesis Test
+
+Question of Interest: How does the different age groups of younger individuals compared to older individuals differ in the rate of mortality due to HIV/AIDS for the year 2002 and 2013?
+
+Null Hypothesis:
+
+-   There is no significant difference in mortality between individuals within the age range of 25 to 29 years old and those who are greater than sixty-five years old from HIV in the years 2002 and 2013.​
+
+Alternative Hypothesis:
+
+-   Individuals in the age group range of 25 to 29 years old have suffered lower rates of mortality than those who are greater than sixty-five years old from HIV for the years 2002 and 2013.​​
+
+```{r}
+
+#Load the packages for the data analysis and visualization
+
+library(dplyr)
+library(ggplot2)
+library(sqldf)
+library(tidyr)
+library(infer) # for hypothesis testing
+library(countrycode)
+
+```
+
+```{r}
+# Read the data that was located on Desktop 
+
+HIV_TB <- read.csv("Desktop/HIV_TB_INCIDENCE_PREVALENCE_DEATHS.csv")
+Malaria <- read.csv("Desktop/MALARIA_INCIDENCE_DEATHS.csv")
+
+valid_iso3 <- unique(countrycode::codelist$iso3c) # checks for valid iso3 codes
+
+# Set up the necessary variables to perform the hypothesis testing for the difference in the mean mortality rate for the years 2002 and 2013. 
+
+HIV_TB_young_2002 <- HIV_TB %>%
+  filter(age_group_name == "25 to 29",
+         location_code %in% valid_iso3,
+         metric == "Deaths",
+         unit == "Number",
+         sex_name == "Both sexes",
+         cause_name == "HIV/AIDS",
+         year == 2002) %>%
+         pull(mean)
+
+HIV_TB_older_2002 <- HIV_TB %>%
+  filter(age_group_name %in% c("65 to 69", "70 to 74", "80 plus"),
+         location_code %in% valid_iso3,
+         metric == "Deaths",
+         unit == "Number",
+         sex_name == "Both sexes",
+         year == 2002) %>%
+         pull(mean)
+
+HIV_TB_young_2013 <- HIV_TB %>%
+  filter(age_group_name == "25 to 29",
+         location_code %in% valid_iso3,
+         metric == "Deaths",
+         unit == "Number",
+         sex_name == "Both sexes",
+         cause_name == "HIV/AIDS",
+         year == 2013) %>%
+         pull(mean)
+
+HIV_TB_older_2013 <- HIV_TB %>%
+  filter(age_group_name %in% c("65 to 69", "70 to 74", "80 plus"),
+         location_code %in% valid_iso3,
+         metric == "Deaths",
+         unit == "Number",
+         sex_name == "Both sexes",
+         cause_name == "HIV/AIDS", 
+         year == 2013) %>%
+         pull(mean)
+
+# Converting to numeric to handle any potential non-numeric values
+HIV_TB_young_numeric_2002 <- as.numeric(as.character(HIV_TB_young$mean))
+HIV_TB_older_numeric_2002 <- as.numeric(as.character(HIV_TB_older$mean))
+HIV_TB_young_numeric_2013 <- as.numeric(as.character(HIV_TB_young$mean))
+HIV_TB_older_numeric_2013 <- as.numeric(as.character(HIV_TB_older$mean))
+
+# Remove any NA values
+HIV_TB_young_numeric_2002 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
+HIV_TB_older_numeric_2002 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
+HIV_TB_young_numeric_2013 <- HIV_TB_young_numeric[!is.na(HIV_TB_young_numeric)]
+HIV_TB_older_numeric_2013 <- HIV_TB_older_numeric[!is.na(HIV_TB_older_numeric)]
+
+# Perform t-test for the year 2002 for younger and older population.
+HIV_2002_test <- t.test(
+  x = HIV_TB_young_numeric_2002, 
+  y = HIV_TB_older_numeric_2002, 
+  alternative = "two.sided",
+  paired = FALSE, 
+  conf.level = 0.95
+)
+
+# Perform t-test for the year 2013 for younger and older population.
+HIV_2013_test <- t.test(
+  x = HIV_TB_young_numeric_2013, 
+  y = HIV_TB_older_numeric_2013, 
+  alternative = "two.sided",
+  paired = FALSE,
+  conf.level = 0.95
+)
+
+HIV_2002_test
+HIV_2013_test
+
+```
+
+### The resultant t-value is t = -9.7376, indicating a negative difference in the mean of mortality for the younger population compared to the older, and with a p-value of less than 2.2E-16, indicating that we would reject the null hypothesis of there being no statistical difference between the two populations.
+
+## Visualization Process
+
+```{r}
+
+plot_data <- data.frame(
+  year = rep(c(2002, 2013), each = 2),
+  age_group = rep(c("20-25", "65 and older"), times = 2),
+  mean_mortality = c(
+    mean(HIV_TB_young_numeric_2002),
+    mean(HIV_TB_older_numeric_2002),
+    mean(HIV_TB_young_numeric_2013),
+    mean(HIV_TB_older_numeric_2013)
+  )
+)
+
+ggplot(plot_data, aes(x = factor(year), y = mean_mortality, fill = age_group)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(
+    title = "Mortality Rates Comparison",
+    x = "Age Group",
+    y = "Mean Mortality Rate",
+    fill = "Age Group"
+  ) +
+  theme_minimal()
+```
