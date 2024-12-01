@@ -10,13 +10,13 @@ library(countrycode)
 library(gt)
 
 # Research question: Is the mortality rate of HIV, TB, and Malaria
-# between 2002 and 2013 significantly more in Somalia than in Vietnam?
+# between 2002 and 2013 significantly different in Vietnam compared to that in Somalia?
 
 # Null Hypothesis (H₀): The mortality rate of HIV, TB, and Malaria
-# between 2002 and 2013 in Somalia is not significantly more than in Vietnam.
+# between 2002 and 2013 in Vietnam is not significantly different compared to that in Somalia.
 
 # Alternative Hypothesis (H₁): The cumulative mortality rate of HIV, TB,
-# and Malaria between 2002 and 2013 in Somalia is significantly more than in Vietnam.
+# and Malaria between 2002 and 2013 in Vietnam is significantly different compared to that in Somalai.
 
 # ==============================================================================
 
